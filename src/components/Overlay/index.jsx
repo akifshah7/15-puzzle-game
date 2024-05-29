@@ -1,8 +1,6 @@
-import './index.css'
+import "./index.css";
 
-const Overlay = ({size}) =>
-    new Array(size)
-        .fill()
-        .map((_,i) => <div key={i} className="overlay"/>)
+const Overlay = ({ size }) =>
+  new Array(size).fill().map((_, i) => <div key={i} className="overlay" />);
 
-export default Overlay
+export default Overlay;

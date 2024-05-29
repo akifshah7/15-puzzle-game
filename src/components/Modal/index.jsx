@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import './index.css';
+import "./index.css";
 
 const Modal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
@@ -9,7 +9,9 @@ const Modal = ({ isOpen, onClose }) => {
       <div className="modal">
         <div className="modal-content">
           <h2>This puzzle is not solvable!</h2>
-          <button className="modal-button" onClick={onClose}>Close</button>
+          <button className="modal-button" onClick={onClose}>
+            Close
+          </button>
         </div>
       </div>
     </div>
