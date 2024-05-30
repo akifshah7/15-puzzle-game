@@ -1,10 +1,12 @@
-:root{
+@import url("https://fonts.googleapis.com/css2?family=Pacifico&display=swap");
+
+:root {
   --size: 100px;
   --tile: #342956;
   --correct: #6e50b4;
 }
-@import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
-html,body {
+html,
+body {
   background: #64bdb0;
   margin: 0;
   padding: 0;
@@ -14,6 +16,7 @@ html,body {
   justify-content: center;
   height: 100vh;
   align-items: center;
-  
 }
-.App * {font-family: 'Pacifico', cursive;}
+.App * {
+  font-family: "Pacifico", cursive;
+}

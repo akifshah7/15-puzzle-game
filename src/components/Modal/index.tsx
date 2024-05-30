@@ -1,7 +1,11 @@
-import PropTypes from "prop-types";
 import "./index.css";
 
-const Modal = ({ isOpen, onClose }) => {
+interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
@@ -16,11 +20,6 @@ const Modal = ({ isOpen, onClose }) => {
       </div>
     </div>
   );
-};
-
-Modal.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
 };
 
 export default Modal;

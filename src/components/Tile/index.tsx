@@ -1,7 +1,14 @@
 import "./index.css";
-import PropTypes from "prop-types";
 
-const Tile = ({ number, moveTile }) => (
+interface TileProps {
+  number: {
+    value: number;
+    index: number;
+  };
+  moveTile: (number: { value: number; index: number }) => void;
+}
+
+const Tile: React.FC<TileProps> = ({ number, moveTile }) => (
   <button
     onClick={() => moveTile(number)}
     className={`number ${number.value === number.index + 1 ? "correct" : ""} ${
@@ -11,13 +18,5 @@ const Tile = ({ number, moveTile }) => (
     {number.value === 16 ? "" : number.value}
   </button>
 );
-
-Tile.propTypes = {
-  number: PropTypes.shape({
-    value: PropTypes.number.isRequired,
-    index: PropTypes.number.isRequired,
-  }).isRequired,
-  moveTile: PropTypes.func.isRequired,
-};
 
 export default Tile;

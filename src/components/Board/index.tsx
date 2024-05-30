@@ -12,11 +12,16 @@ import Overlay from "../Overlay";
 import Shuffle from "../Shuffle";
 import Modal from "../Modal";
 import HelpMe from "../HelpMe";
-import { isSolvable, shuffle } from "../../utils";
+import { isSolvable, shuffle, findNextMove } from "../../utils";
 
-const Board = () => {
+interface PuzzleTile {
+  value: number;
+  index: number;
+}
+
+const Board: React.FC = () => {
   // State variables
-  const [numbers, setNumbers] = useState([]); // Array of objects representing puzzle tiles
+  const [numbers, setNumbers] = useState<PuzzleTile[]>([]); // Array of objects representing puzzle tiles
   const [animating, setAnimating] = useState(false); // Animation state
   const [solvable, setSolvable] = useState(true); // Solvability state
   const [modalOpen, setModalOpen] = useState(false); // Modal state
@@ -28,7 +33,7 @@ const Board = () => {
   const reset = () => {
     // Randomly decide if the puzzle should be unsolvable
     const forceUnsolvable = Math.random() < 0.1;
-    const newNumbers = shuffle(forceUnsolvable); // Shuffle the tiles
+    const newNumbers = shuffle(forceUnsolvable) as PuzzleTile[]; // Shuffle the tiles
     setNumbers(newNumbers); // Update the state with shuffled tiles
     setSolvable(isSolvable(newNumbers.map((num) => num.value))); // Check solvability
     if (!solvable) {
@@ -40,14 +45,15 @@ const Board = () => {
    * Moves the specified tile if it's adjacent to the empty space and animation is not in progress.
    * @param {Object} tile The tile object to be moved.
    */
-  const moveTile = (tile) => {
-    const i16 = numbers.find((n) => n.value === 16).index; // Index of the empty tile
+  const moveTile = (tile: { value: number; index: number }) => {
+    const i16 = numbers.find((n) => n.value === 16)?.index; // Index of the empty tile
+    if (i16 === undefined) return;
+
     // Check if the tile is adjacent to the empty space and animation is not in progress
-    if (![i16 - 1, i16 + 1, i16 - 4, i16 + 4].includes(tile.index) || animating)
-      return;
+    if (![i16 - 1, i16 + 1, i16 - 4, i16 + 4].includes(tile.index) || animating) return;
 
     // Move the tile
-    const newNumbers = [...numbers].map((number) => {
+    const newNumbers = numbers.map((number) => {
       if (number.index !== i16 && number.index !== tile.index) return number;
       else if (number.value === 16) return { value: 16, index: tile.index };
       return { value: tile.value, index: i16 };
@@ -62,18 +68,28 @@ const Board = () => {
    * Handles keyboard input for arrow key navigation.
    * @param {Event} e The keydown event object.
    */
-  const handleKeyDown = (e) => {
-    const i16 = numbers.find((n) => n.value === 16).index; // Index of the empty tile
+  const handleKeyDown = (e: KeyboardEvent) => {
+    const i16 = numbers.find((n) => n.value === 16)?.index; // Index of the empty tile
+    if (i16 === undefined) return;
+
     // Move tile based on arrow key pressed
-    if (e.keyCode === 37 && !(i16 % 4 === 3))
-      moveTile(numbers.find((n) => n.index === i16 + 1));
-    else if (e.keyCode === 38 && !(i16 > 11))
-      moveTile(numbers.find((n) => n.index === i16 + 4));
-    else if (e.keyCode === 39 && !(i16 % 4 === 0))
-      moveTile(numbers.find((n) => n.index === i16 - 1));
-    else if (e.keyCode === 40 && !(i16 < 4))
-      moveTile(numbers.find((n) => n.index === i16 - 4));
+    if (e.key === "ArrowLeft" && !(i16 % 4 === 3))
+      moveTile(numbers.find((n) => n.index === i16 + 1)!);
+    else if (e.key === "ArrowUp" && !(i16 > 11))
+      moveTile(numbers.find((n) => n.index === i16 + 4)!);
+    else if (e.key === "ArrowRight" && !(i16 % 4 === 0))
+      moveTile(numbers.find((n) => n.index === i16 - 1)!);
+    else if (e.key === "ArrowDown" && !(i16 < 4))
+      moveTile(numbers.find((n) => n.index === i16 - 4)!);
   };
+
+  /**
+   * Makes the next move towards solving the puzzle.
+   */
+  // const helpMe = () => {
+  //   const nextMove = findNextMove(numbers);
+  //   moveTile(nextMove);
+  // };
 
   // Register and unregister keydown event listener for keyboard input handling
   useEffect(() => {
@@ -81,7 +97,7 @@ const Board = () => {
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  });
+  }, [numbers]);
 
   // Initialize the game board on component mount
   useEffect(reset, []);
@@ -92,14 +108,14 @@ const Board = () => {
       <div className="board">
         <Overlay size={16} />
         {/* Render tiles */}
-        {numbers.map((x, i) => {
-          return <Tile key={i} number={x} moveTile={moveTile} />;
-        })}
+        {numbers.map((x, i) => (
+          <Tile key={i} number={x} moveTile={moveTile} />
+        ))}
       </div>
       {/* Shuffle button and help button */}
       <div className="wrapper">
         <Shuffle reset={reset} />
-        <HelpMe />
+        {/* <HelpMe helpMe={helpMe} /> */}
       </div>
       {/* Modal for unsolvable puzzle notification */}
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
