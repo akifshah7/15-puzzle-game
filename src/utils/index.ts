@@ -55,7 +55,9 @@ export const isSolvable = (array: number[]): boolean => {
  * @note The function generates a random configuration of the puzzle tiles and checks if it is solvable using the `isSolvable` function.
  * If `forceUnsolvable` is `true`, it continues to generate configurations until an unsolvable puzzle is obtained.
  */
-export const shuffle = (forceUnsolvable = false): { value: number, index: number }[] => {
+export const shuffle = (
+  forceUnsolvable = false
+): { value: number; index: number }[] => {
   let array;
   do {
     array = new Array(16)
@@ -72,7 +74,9 @@ export const shuffle = (forceUnsolvable = false): { value: number, index: number
  * @param numbers The array representing the current state of the puzzle.
  * @returns The tile object representing the next move.
  */
-export const findNextMove = (numbers: { value: number, index: number }[]): { value: number, index: number } | null => {
+export const findNextMove = (
+  numbers: { value: number; index: number }[]
+): { value: number; index: number } | null => {
   const emptyIndex = numbers.findIndex((n) => n.value === 16);
   const moves = [
     { x: 0, y: -1 },
@@ -86,7 +90,7 @@ export const findNextMove = (numbers: { value: number, index: number }[]): { val
     if (nextIndex >= 0 && nextIndex < 16) {
       const nextTile = numbers[nextIndex];
       if (
-        Math.abs(emptyIndex % 4 - nextIndex % 4) +
+        Math.abs((emptyIndex % 4) - (nextIndex % 4)) +
           Math.abs(Math.floor(emptyIndex / 4) - Math.floor(nextIndex / 4)) ===
         1
       ) {
