@@ -12,7 +12,9 @@ import Overlay from "../Overlay";
 import Shuffle from "../Shuffle";
 import Modal from "../Modal";
 import HelpMe from "../HelpMe";
-import { isSolvable, shuffle, findNextMove } from "../../utils";
+import { isSolvable, shuffle } from "../../utils";
+import { solvePuzzle } from "../../utils/puzzleSolver";
+import PuzzleWorker from "./worker?worker";
 
 interface PuzzleTile {
   value: number;
@@ -26,18 +28,32 @@ const Board: React.FC = () => {
   const [solvable, setSolvable] = useState(true); // Solvability state
   const [modalOpen, setModalOpen] = useState(false); // Modal state
 
+  const [solution, setSolution] = useState<PuzzleTile[]>([]);
+  const [solutionStep, setSolutionStep] = useState(0);
+
+
   /**
-   * Resets the game board by shuffling the tiles. If the puzzle is unsolvable,
-   * it opens the modal to notify the user.
+   * Resets the game board by shuffling the tiles.
+   * If the puzzle is unsolvable, it opens the modal to notify the user.
+   * If solvable, computes the solution sequence using the A* algorithm.
    */
   const reset = () => {
-    // Randomly decide if the puzzle should be unsolvable
     const forceUnsolvable = Math.random() < 0.1;
-    const newNumbers = shuffle(forceUnsolvable) as PuzzleTile[]; // Shuffle the tiles
-    setNumbers(newNumbers); // Update the state with shuffled tiles
-    setSolvable(isSolvable(newNumbers.map((num) => num.value))); // Check solvability
+    const newNumbers = shuffle(forceUnsolvable);
+    setNumbers(newNumbers);
+    const solvable = isSolvable(newNumbers.map((num) => num.value));
+    setSolvable(solvable);
     if (!solvable) {
-      setModalOpen(true); // Open modal if puzzle is unsolvable
+      setModalOpen(true);
+    } else {
+      const initialState = newNumbers.map((num) => num.value);
+      const worker = new PuzzleWorker();
+      worker.postMessage(initialState);
+      worker.onmessage = function (e: any) {
+        setSolution(e.data);
+        setSolutionStep(0);
+        worker.terminate();
+      };
     }
   };
 
@@ -45,24 +61,40 @@ const Board: React.FC = () => {
    * Moves the specified tile if it's adjacent to the empty space and animation is not in progress.
    * @param {Object} tile The tile object to be moved.
    */
-  const moveTile = (tile: { value: number; index: number }) => {
-    const i16 = numbers.find((n) => n.value === 16)?.index; // Index of the empty tile
-    if (i16 === undefined) return;
-
-    // Check if the tile is adjacent to the empty space and animation is not in progress
-    if (![i16 - 1, i16 + 1, i16 - 4, i16 + 4].includes(tile.index) || animating) return;
-
-    // Move the tile
+  const moveTile = (tile: PuzzleTile) => {
+    const emptyTile = numbers.find((n) => n.value === 16);
+    if (!emptyTile) return;
+  
+    const i16 = emptyTile.index;
+    const tileIndex = tile.index;
+  
+    // Calculate the valid positions for adjacency
+    const adjacentPositions = [
+      i16 - 1, // left
+      i16 + 1, // right
+      i16 - 4, // above
+      i16 + 4  // below
+    ];
+  
+    // Ensure the move is valid and the tile is adjacent to the empty space
+    const isValidMove = adjacentPositions.includes(tileIndex);
+    const isAnimating = animating;
+  
+    if (!isValidMove || isAnimating) return;
+  
+    // Swap the empty tile with the current tile
     const newNumbers = numbers.map((number) => {
-      if (number.index !== i16 && number.index !== tile.index) return number;
-      else if (number.value === 16) return { value: 16, index: tile.index };
-      return { value: tile.value, index: i16 };
+      if (number.index === i16) return { ...number, index: tileIndex };
+      if (number.index === tileIndex) return { ...number, index: i16 };
+      return number;
     });
-    // Update state and set animation flag
+  
     setAnimating(true);
     setNumbers(newNumbers);
-    setTimeout(() => setAnimating(false), 200); // Reset animation flag after 200ms
+    setTimeout(() => setAnimating(false), 200);
   };
+  
+  
 
   /**
    * Handles keyboard input for arrow key navigation.
@@ -84,12 +116,14 @@ const Board: React.FC = () => {
   };
 
   /**
-   * Makes the next move towards solving the puzzle.
+   * Provides a hint by moving the next tile in the solution sequence.
    */
-  // const helpMe = () => {
-  //   const nextMove = findNextMove(numbers);
-  //   moveTile(nextMove);
-  // };
+  const helpMe = () => {
+    if (solutionStep < solution.length) {
+      moveTile(solution[solutionStep]);
+      setSolutionStep((prev) => prev + 1);
+    }
+  };
 
   // Register and unregister keydown event listener for keyboard input handling
   useEffect(() => {
@@ -115,7 +149,7 @@ const Board: React.FC = () => {
       {/* Shuffle button and help button */}
       <div className="wrapper">
         <Shuffle reset={reset} />
-        {/* <HelpMe helpMe={helpMe} /> */}
+        <HelpMe nextMove={helpMe} />
       </div>
       {/* Modal for unsolvable puzzle notification */}
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
