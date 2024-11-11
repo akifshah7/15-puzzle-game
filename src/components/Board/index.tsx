@@ -13,8 +13,8 @@ import Shuffle from "../Shuffle";
 import Modal from "../Modal";
 // import HelpMe from "../HelpMe";
 import { isSolvable, shuffle } from "../../utils";
-import { solvePuzzle } from "../../utils/puzzleSolver";
-import PuzzleWorker from "./worker?worker";
+// import { solvePuzzle } from "../../utils/puzzleSolver";
+// import PuzzleWorker from "./worker?worker";
 
 interface PuzzleTile {
   value: number;
@@ -25,11 +25,11 @@ const Board: React.FC = () => {
   // State variables
   const [numbers, setNumbers] = useState<PuzzleTile[]>([]); // Array of objects representing puzzle tiles
   const [animating, setAnimating] = useState(false); // Animation state
-  const [solvable, setSolvable] = useState(true); // Solvability state
+  // const [solvable, setSolvable] = useState(true); // Solvability state
   const [modalOpen, setModalOpen] = useState(false); // Modal state
 
-  const [solution, setSolution] = useState<PuzzleTile[]>([]);
-  const [solutionStep, setSolutionStep] = useState(0);
+  // const [solution, setSolution] = useState<PuzzleTile[]>([]);
+  // const [solutionStep, setSolutionStep] = useState(0);
 
 
   /**
@@ -42,18 +42,18 @@ const Board: React.FC = () => {
     const newNumbers = shuffle(forceUnsolvable);
     setNumbers(newNumbers);
     const solvable = isSolvable(newNumbers.map((num) => num.value));
-    setSolvable(solvable);
+    // setSolvable(solvable);
     if (!solvable) {
       setModalOpen(true);
     } else {
-      const initialState = newNumbers.map((num) => num.value);
-      const worker = new PuzzleWorker();
-      worker.postMessage(initialState);
-      worker.onmessage = function (e: any) {
-        setSolution(e.data);
-        setSolutionStep(0);
-        worker.terminate();
-      };
+      // const initialState = newNumbers.map((num) => num.value);
+      // const worker = new PuzzleWorker();
+      // worker.postMessage(initialState);
+      // worker.onmessage = function (e: any) {
+      //   setSolution(e.data);
+      //   setSolutionStep(0);
+      //   worker.terminate();
+      // };
     }
   };
 
@@ -118,12 +118,12 @@ const Board: React.FC = () => {
   /**
    * Provides a hint by moving the next tile in the solution sequence.
    */
-  const helpMe = () => {
-    if (solutionStep < solution.length) {
-      moveTile(solution[solutionStep]);
-      setSolutionStep((prev) => prev + 1);
-    }
-  };
+  // const helpMe = () => {
+  //   if (solutionStep < solution.length) {
+  //     moveTile(solution[solutionStep]);
+  //     setSolutionStep((prev) => prev + 1);
+  //   }
+  // };
 
   // Register and unregister keydown event listener for keyboard input handling
   useEffect(() => {
