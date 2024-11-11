@@ -11,7 +11,7 @@ import Tile from "../Tile";
 import Overlay from "../Overlay";
 import Shuffle from "../Shuffle";
 import Modal from "../Modal";
-import HelpMe from "../HelpMe";
+// import HelpMe from "../HelpMe";
 import { isSolvable, shuffle } from "../../utils";
 import { solvePuzzle } from "../../utils/puzzleSolver";
 import PuzzleWorker from "./worker?worker";
@@ -149,7 +149,7 @@ const Board: React.FC = () => {
       {/* Shuffle button and help button */}
       <div className="wrapper">
         <Shuffle reset={reset} />
-        <HelpMe nextMove={helpMe} />
+        {/* <HelpMe nextMove={helpMe} /> */}
       </div>
       {/* Modal for unsolvable puzzle notification */}
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
